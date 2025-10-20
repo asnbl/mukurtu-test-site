@@ -1,0 +1,18 @@
+name = oEmbed
+description = Common functionality for oEmbed client and provider
+package = oEmbed
+core = 7.x
+
+dependencies[] = ctools
+
+files[] = oembed.test
+files[] = OEmbedStreamWrapper.inc
+files[] = MediaInternetOEmbedHandler.inc
+
+configure = admin/config/media/oembed
+
+; Information added by Drupal.org packaging script on 2020-03-22
+version = "7.x-1.0-rc2+42-dev"
+core = "7.x"
+project = "oembed"
+datestamp = "1584883677"

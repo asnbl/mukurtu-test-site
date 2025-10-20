@@ -1,0 +1,837 @@
+<?php
+/**
+ * @file
+ * Code for the ma_culturalprotocol feature.
+ */
+
+include_once('ma_culturalprotocol.features.inc');
+
+define('SIGNUP_PERM_FIELD', 'field_protocl_signup_permissions');
+
+/**
+ * Implements hook_user_insert().
+ */
+function ma_culturalprotocol_user_insert(&$edit, $account, $category) {
+  // add the user to any protocols with the 'field_protocol_auto_join' set to 1
+  $userid = $account->uid;
+
+  $query = new EntityFieldQuery();
+
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'cultural_protocol_group')
+    ->propertyCondition('status', NODE_PUBLISHED)
+    ->fieldCondition('field_protocol_auto_join', 'value', '1')
+    ->addMetaData('account', user_load(1)); // Run the query as user 1.
+
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $item_nids = array_keys($result['node']);
+
+    foreach ($item_nids as $protocol_nid) {
+      _add_user_to_group($userid, $protocol_nid);
+    }
+  }
+}
+
+/**
+ * Act on a user being added to a group
+ *
+ * If a user is added to a community, add them to the default protocol
+ *
+ * If the user is added to a protocol, add them to the parent community
+ *
+ * Implements hook_og_membership_presave().
+ */
+function ma_culturalprotocol_og_membership_presave(OgMembership $og_membership) {
+
+	if ($og_membership->entity_type == 'user') {
+
+		// if the membership state is active, check if there's an associated default community
+		if ($og_membership->group_type == 'node' && !empty($og_membership->gid) && $og_membership->state == 1) {
+		  $group_node = node_load($og_membership->gid);
+
+		  if ($group_node->type == 'community') {
+
+		    // add the user to the community's default protocol
+		    $proto_nid = $og_membership->gid+1;
+		    $protocol_node = node_load($proto_nid);
+		    if ($protocol_node && $protocol_node->type == 'cultural_protocol_group' && !empty($protocol_node->og_group_ref) && $protocol_node->og_group_ref['und'][0]['target_id'] == $og_membership->gid) {
+		      if (!isset($_SESSION['member_add_prevent_infinite_loop']['community_' . $group_node->nid . ':protocol_' . $proto_nid])) {
+		        $user = user_load($og_membership->etid);
+		        if (!og_is_member('node', $proto_nid, 'user', $user)) {
+		          $_SESSION['member_add_prevent_infinite_loop']['community_' . $group_node->nid . ':protocol_' . $proto_nid] = TRUE;
+		          _add_user_to_group($og_membership->etid, $proto_nid);
+		          if (!isset($_SESSION['repress_user_add_messages'])) {
+		            drupal_set_message(t('<i>' . $user->name . "</i> has been added to <i>" . $group_node->title . "</i>'s default Cultural Protocol <i>" . $protocol_node->title . '</i>'));
+		          }
+		        }
+		      }
+		      else {
+		        unset ($_SESSION['member_add_prevent_infinite_loop']['community_' . $group_node->nid . ':protocol_' . $proto_nid]);
+		      }
+		    }
+
+		    // if this is a child community, add the user to the parent community
+		    if (isset($group_node->field_parent_community['und'][0]['target_id'])) {
+		      $parent_community_node = node_load($group_node->field_parent_community['und'][0]['target_id']);
+		      $user = user_load ($og_membership->etid);
+		      if (!og_is_member ('node', $parent_community_node->nid, 'user', $user)) {
+		        if ($parent_community_node->type == 'community') {
+		          _add_user_to_group($og_membership->etid, $parent_community_node->nid);
+		          if (!isset($_SESSION['repress_user_add_messages'])) {
+		            drupal_set_message(t('<i>' . $user->name . '</i> has been added to the Parent Community <i>' . $parent_community_node->title . '</i>'));
+		          }
+		        }
+		      }
+		    }
+
+		  }
+
+		  else if ($group_node->type == 'cultural_protocol_group') {
+
+		    // add the user to the cultural protocol's parent community
+		    if (isset($group_node->og_group_ref['und'][0]['target_id'])) {
+		      $community_node = node_load($group_node->og_group_ref['und'][0]['target_id']);
+		      if (!isset($_SESSION['member_add_prevent_infinite_loop']['community_' . $community_node->nid . ':protocol_' . $group_node->nid])) {
+		        $user = user_load($og_membership->etid);
+		        if (!og_is_member('node', $community_node->nid, 'user', $user)) {
+		          if ($community_node->type == 'community') {
+		            $_SESSION['member_add_prevent_infinite_loop']['community_' . $community_node->nid . ':protocol_' . $group_node->nid] = TRUE;
+		            _add_user_to_group($og_membership->etid, $community_node->nid);
+		            if (!isset($_SESSION['repress_user_add_messages'])) {
+		              drupal_set_message(t('<i>' . $user->name . "</i> has been added to <i>" . $group_node->title . "</i>'s Community <i>" . $community_node->title . '</i>'));
+		            }
+		          }
+		        }
+		      }
+		      else {
+		        unset ($_SESSION['member_add_prevent_infinite_loop']['community_' . $community_node->nid . ':protocol_' . $group_node->nid]);
+		      }
+		    }
+		  }
+
+		}
+	}
+}
+
+
+/**
+ * Implements hook_node_insert().
+ */
+function ma_culturalprotocol_node_insert($node) {
+  if ($node->type == 'cultural_protocol_group') {
+    _process_group_signup_permissions($node);
+    _set_cp_steward_on_cp_create ($node);
+
+    $cp_new = entity_metadata_wrapper('node', $node);
+    _process_nodes_in_cp_node_access ($cp_new);
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function ma_culturalprotocol_node_update($node) {
+  if ($node->type == 'cultural_protocol_group') {
+    _process_group_signup_permissions($node);
+
+    $cp_new = entity_metadata_wrapper('node', $node);
+    if ($node->original) { // Even though we are in hook_update, there can be cases where this is empty
+      $cp_old = entity_metadata_wrapper('node', $node->original);
+    }
+    _process_nodes_in_cp_node_access ($cp_new, $cp_old);
+  }
+}
+
+
+/**
+ * Return if a cultural protocol is being referenced by nodes or atoms
+ *
+ * @param $node
+ */
+function _ma_culturalprotocol_is_active($node) {
+    // Check nodes for CP references
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+        ->fieldCondition('og_group_ref', 'target_id', $node->nid)
+        ->count();
+
+    $results = intval($query->execute());
+
+    // Check Scald atoms for CP references
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'scald_atom')
+        ->fieldCondition('field_scald_protocol', 'target_id', $node->nid)
+        ->count();
+
+    $results += intval($query->execute());
+
+    if($results > 0) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function ma_culturalprotocol_node_access($node, $op, $account) {
+    $type = is_string($node) ? $node : $node->type;
+
+    if($type == 'cultural_protocol_group') {
+        switch($op) {
+        case 'create':
+            // OG node_access doesn't know what to do for users with no community memberships yet.
+            // This causes users like Language Stewards to be presented with the option to create protocols, which we don't want.
+            // Here we explicitly check for the ability to create protocols
+            $access = FALSE;
+            $groups_for_user = og_get_groups_by_user($account, 'node');
+            foreach($groups_for_user as $group) {
+              $roles = og_get_user_roles('node', $group);
+              if(in_array('community manager', $roles)) {
+                // Check if user has global permission to create protocols.
+                if(user_access('create cultural_protocol_group content', $account)) {
+                  $access = TRUE;
+                  break;
+                }
+
+                // Check if user has OG permission to create protocols.
+                if(og_user_access("node", $group, 'create cultural_protocol_group content', $account)) {
+                  $access = TRUE;
+                  break;
+                }
+
+                $cps = ma_cultural_protocol_get_cps_for_user($roles, $group);
+                if(!empty($cps)) {
+                  foreach(array_keys($cps) as $cp) {
+                    // Check each protocol for OG permission to create protocols.
+                    if(og_user_access("node", $cp, 'create cultural_protocol_group content', $account)) {
+                      $access = TRUE;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+
+            if(!$access) {
+              return NODE_ACCESS_DENY;
+            }
+            break;
+        case 'delete':
+            // Don't let a user delete a cultural protocol if it is being actively referenced
+            if(_ma_culturalprotocol_is_active($node)) {
+                return NODE_ACCESS_DENY;
+            }
+            break;
+        }
+    }
+}
+
+
+/**
+ * Allows a single field to be used to select the type of non-member signups in a node
+ *
+ * @param $node
+ */
+function _process_group_signup_permissions($node) {
+
+  // ** PART 1 - ensure the node has the permissions defaults set
+
+  $gid = $node->nid;
+  unset($node->is_new);
+  $wrapper = entity_metadata_wrapper('node', $node);
+
+  $signup_perm_value = $node->{SIGNUP_PERM_FIELD}['und'][0]['value'];  // open, private, moderated, default
+  $og_perm_value = $node->og_roles_permissions['und'][0]['value'];
+
+  if ($signup_perm_value == 'default') {
+    if ($og_perm_value != 0) {
+      $wrapper->og_roles_permissions->set(0);
+      $wrapper->save();
+    }
+
+  } else {
+    if ($og_perm_value != 1) {
+      $wrapper->og_roles_permissions->set(1);
+      $wrapper->save();
+    }
+  }
+
+  // ** PART 2 - if defaults overriden then apply appropriate grants
+
+  if (!isset($node->{SIGNUP_PERM_FIELD})) {
+    return;
+  }
+
+  $signup_perm_value = $node->{SIGNUP_PERM_FIELD}['und'][0]['value'];  // open, private, moderated, default
+  $default_access = og_is_group_default_access('node', $gid);
+
+  if ($signup_perm_value != 'default' && !$default_access) {
+
+    $roles = og_roles('node','cultural_protocol_group', $gid);
+    $roles = array_flip($roles);
+
+    switch ($signup_perm_value) {
+      case 'private':
+        // unset subscribe permission for non-member
+        og_role_revoke_permissions($roles['non-member'], array('subscribe without approval'));
+        og_role_revoke_permissions($roles['non-member'], array('subscribe'));
+        break;
+      case 'moderated':
+        og_role_revoke_permissions($roles['non-member'], array('subscribe without approval'));
+        og_role_grant_permissions($roles['non-member'], array('subscribe'));
+        break;
+      case 'open':
+        // set subscribe-without-approval for nonmember
+        og_role_grant_permissions($roles['non-member'], array('subscribe without approval'));
+        break;
+    }
+  }
+}
+
+function _process_nodes_in_cp_node_access ($cp_new, $cp_old = NULL) {
+  if (!is_null($cp_old)) {
+    if ($cp_old->group_access->value() == $cp_new->group_access->value()
+      AND $cp_old->og_roles_permissions->value() == $cp_new->og_roles_permissions->value()
+    ) {
+      return; // No need to reprocess the nodes-in-CP if neither of these fields changed
+    }
+  }
+
+  $types_to_process = [
+    'digital_heritage' => 'mukurtu_dh_nodes_to_rebuild_perms_and_reindex',
+    'dictionary_word' => 'mukurtu_dw_nodes_to_rebuild_perms_and_reindex',
+    'collection' => 'mukurtu_coll_nodes_to_rebuild_perms_and_reindex',
+  ];
+  foreach ($types_to_process as $type_to_process => $process_nids_var) {
+    $query = new EntityFieldQuery();
+    $result = $query
+      ->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', $type_to_process)
+      ->fieldCondition('og_group_ref', 'target_id', $cp_new->getIdentifier())
+      ->execute();
+    $nids = empty($result['node']) ? array() : array_keys($result['node']);
+    if (count($nids)) {
+      $nodes_to_rebuid_and_reindex = variable_get($process_nids_var, array());
+      $nodes_to_rebuid_and_reindex = array_merge($nodes_to_rebuid_and_reindex, $nids);
+      variable_set($process_nids_var, $nodes_to_rebuid_and_reindex);
+    }
+  }
+
+}
+
+function _set_cp_steward_on_cp_create($node) {
+  global $user;
+  $rid = array_search ('protocol steward', og_roles('node', 'cultural_protocol_group', $node->nid));
+  og_role_grant('node', $node->nid, $user->uid, $rid);
+}
+
+/**
+ * Helper function to add a user to a group
+ *
+ * @param $uid
+ * @param $gid
+ * @throws OgException
+ */
+function _add_user_to_group($uid, $gid) {
+
+  watchdog ('mukurtu', 'adding user ' . $uid . ' to group ' . $gid);
+  // Load the user we want to add to the group (ID #2 was my test user)
+  $account = user_load($uid);
+
+  $values = array(
+    'entity_type' => 'user',
+    'entity' => $account,
+    'state' => OG_STATE_ACTIVE,
+  );
+
+  og_group('node', $gid, $values);
+
+  // Changes the users role in the group (1 = non-member, 2 = member, 3 = administrator member)
+//  og_role_grant($group->gid, $account->uid, 3);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ma_culturalprotocol_form_cultural_protocol_group_node_form_alter(&$form, &$form_state) {
+
+  // Only show the Signup Permissions if the Sharing Protocol is open
+  $form['field_protocl_signup_permissions']['#states'] = array(
+    'visible' => array(
+      ':input[name="group_access[und]"]' => array ('value' => '0'),
+    ),
+  );
+
+  // 1, Only show communities for the group ref field
+  // 2. Only show communities that the user is a Community Manager of OR that are already set on the field (eg. by a previous Protocol steward that is a Community Manager of a Community that the current Protocol Manager is not, so that it does not get unset)
+  $communities_only = $form['og_group_ref'][LANGUAGE_NONE]['#options']['Community'];
+  $default_values = $form['og_group_ref'][LANGUAGE_NONE]['#default_value'];
+  foreach ($communities_only as $community_nid => $community_name) {
+    $roles = og_get_user_roles('node', $community_nid);
+    if (!in_array('community manager', $roles) && !in_array($community_nid, $default_values)) {
+      unset ($communities_only[$community_nid]);
+    }
+  }
+  $form['og_group_ref'][LANGUAGE_NONE]['#options'] = $communities_only;
+}
+
+/**
+ * Implements hook_node_validate().
+ */
+function ma_culturalprotocol_node_validate($node, $form, &$form_state) {
+  if (ma_cultural_protocol_node_type_must_have_cp($node->type)) {
+    $missing = FALSE;
+    // Don't allow empty protocol fields for items that require protocols.
+    if (empty($node->og_group_ref[LANGUAGE_NONE])) {
+      if (!in_array($node->type, ma_culturalprotocol_collab_child_node_types())) { // Special handling for collaboration child node types done in ma_collaboration_tools_form_alter() and function ma_collaboration_tools_node_presave(), so skip validating their og_group_ref fields here.
+        form_set_error('og_group_ref', 'You must specify a protocol for this item.');
+        $missing = TRUE;
+      }
+    }
+
+    // Don't allow empty privacy setting for items that require protocols.
+    if (empty($node->field_item_privacy_setting[LANGUAGE_NONE])
+    || !isset($node->field_item_privacy_setting[LANGUAGE_NONE][0]['value'])
+    || $node->field_item_privacy_setting[LANGUAGE_NONE][0]['value'] == NULL) {
+      form_set_error('field_item_privacy_setting', 'You must specify an item sharing setting.');
+      $missing = TRUE;
+    }
+
+    // If we have missing field values we don't need to do any more validation.
+    if ($missing) {
+      return;
+    }
+
+    // Validate protocols. This is primarily to handle users with bypass
+    // permissions like administrators. We want to allow them to edit
+    // the item as expected, but prevent altering the original access
+    // scope of the item.
+    $original_node = NULL;
+    if (isset($node->og_group_ref[LANGUAGE_NONE])) {
+      if (isset($node->nid)) {
+        $original_node = node_load($node->nid);
+      }
+
+      $allowed_protocols = ma_cultural_protocol_get_cps_user_can_post_to();
+      // Validate switch from old -> new protocols.
+      if ($original_node && !empty($original_node->og_group_ref[LANGUAGE_NONE])) {
+        $original_privacy_setting = $original_node->field_item_privacy_setting[LANGUAGE_NONE][0]['value'] ?? 'all';
+
+        // For "all" privacy setting, user must have rights to all protocols in
+        // order to modify protocol field values OR the protocols must not have
+        // changed.
+        if ($original_privacy_setting == 'all') {
+          foreach ($original_node->og_group_ref[LANGUAGE_NONE] as $delta => $value) {
+            $new_value = $node->og_group_ref[LANGUAGE_NONE][$delta]['target_id'] ?? NULL;
+            if (!isset($allowed_protocols[$value['target_id']]) && $value['target_id'] != $new_value) {
+              form_set_error('og_group_ref', 'You are not allowed to alter the protocols for this item.');
+            }
+          }
+        }
+
+        // For "any" privacy setting, user must have rights to one protocol in
+        // order to modify protocol field values OR the protocols must not
+        // have changed.
+        if ($original_privacy_setting == 'any') {
+          foreach ($original_node->og_group_ref[LANGUAGE_NONE] as $delta => $value) {
+            $new_value = $node->og_group_ref[LANGUAGE_NONE][$delta]['target_id'] ?? NULL;
+            if (isset($allowed_protocols[$value['target_id']]) || $value['target_id'] == $new_value) {
+              continue;
+            }
+            form_set_error('og_group_ref', 'You are not allowed to alter the protocols for this item.');
+          }
+        }
+      }
+
+      // Confirm that the user has access to the selected protocols
+      // for new items. Revisions have already been tested above.
+      $is_new = is_null($original_node) ?? FALSE;
+      if ($is_new) {
+        foreach ($node->og_group_ref[LANGUAGE_NONE] as $delta => $value) {
+          if (!isset($value['target_id'])) {
+            continue;
+          }
+          if (!isset($allowed_protocols[$value['target_id']])) {
+            form_set_error('og_group_ref', 'Invalid protocol selected.');
+          }
+        }
+      }
+    }
+  }
+
+  if ($node->type == 'cultural_protocol_group') {
+
+    // Do not allow unsetting Parent Community for Communities that the user is not a Community Manager of
+    $default_values = $form['og_group_ref'][LANGUAGE_NONE]['#default_value'];
+    foreach ($default_values as $community_nid) {
+      if (!in_array ($community_nid, $form['og_group_ref'][LANGUAGE_NONE]['#value'])) {
+        $roles = og_get_user_roles('node', $community_nid);
+        if (!in_array('community manager', $roles)) {
+          $community = node_load ($community_nid);
+          form_set_error ('og_group_ref', 'You cannot unset <i>' . $community->title . '</i> as a Parent Community because you are not one its Community Managers.');
+        }
+      }
+    }
+  }
+}
+
+
+/*
+ * Helper function used nodes-in-CP custom protocol field and scald protocol field (default OG) to reduce down the available groups the user is a member of to those the user has posting permissions on, because OG on its own is not handling this
+ */
+function ma_cultural_protocol_get_cps_user_can_post_to ($community_nid = NULL, $import_form = FALSE) {
+  $roles = [
+    'contributor',
+    'protocol steward'
+  ];
+  return ma_cultural_protocol_get_cps_for_user($roles, $community_nid, $import_form);
+}
+
+/*
+ * CPs that a user is a Protocol Steward of.
+ */
+function ma_cultural_protocol_get_cps_user_is_steward() {
+  $roles = [
+    'protocol steward'
+  ];
+  return ma_cultural_protocol_get_cps_for_user($roles);
+}
+
+/*
+ * Checks if a user is a member of any of its CPs
+ */
+function ma_cultural_protocol_user_is_member_of_at_least_one_cp_of_node($node, $user = NULL) {
+  if (!$user) {
+    global $user;
+  }
+  foreach ($node->og_group_ref[LANGUAGE_NONE] as $cp) {
+    if (og_is_member('node', $cp['target_id'], 'user', $user)) {
+      return TRUE;
+    }
+  }
+}
+
+/*
+ * Helper function for the CPs for user helper functions.
+ */
+function ma_cultural_protocol_get_cps_for_user($roles, $community_nid = NULL, $import_form = FALSE) {
+  $cps = [];
+  $groups_for_user = og_get_groups_by_user(null, 'node');
+  if (count($groups_for_user)) {
+    $allowed_groups_for_user[] = [];
+    foreach ($groups_for_user as $group_for_user) {
+      $roles_for_user_in_group = og_get_user_roles('node', $group_for_user);
+      if ($import_form OR array_intersect($roles, $roles_for_user_in_group)) {
+        $allowed_groups_for_user[] = $group_for_user;
+      }
+    }
+
+    // EFQ to get sub protocols for a community (or all if no community specified)
+    $query = new EntityFieldQuery();
+
+    $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'cultural_protocol_group')
+      ->propertyCondition('status', NODE_PUBLISHED);
+    if ($community_nid) {
+      $query->fieldCondition('og_group_ref', 'target_id', $community_nid, '=');
+    }
+
+    $result = $query->execute();
+
+    if (isset($result['node'])) {
+      $protocol_items_nids = array_keys($result['node']);
+      $protocol_items = entity_load('node', $protocol_items_nids);
+
+      foreach ($protocol_items as $protocol_item) {
+        if (in_array($protocol_item->nid, $allowed_groups_for_user)) {
+          $cps[$protocol_item->nid] = $protocol_item->title;
+        }
+      }
+    }
+  }
+  return $cps;
+}
+
+/**
+ * Returns an array of all published open cultural protocol IDs.
+ */
+function ma_cultural_protocol_get_open_protocol_ids() {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'cultural_protocol_group')
+    ->fieldCondition('group_access', 'value', '0')
+    ->propertyCondition('status', NODE_PUBLISHED);
+
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    return array_keys($result['node']);
+  }
+  return [];
+}
+
+/**
+ * Collab Pages functions shared with cultural protocol feature. Included here because ma_collaboration_tools can be disabled.
+ */
+
+/**
+ * Overall map of the collab pages types, to be used by the helper functions below.
+ */
+function ma_culturalprotocol_collab_node_types_map() {
+  return [
+    'event' => ['parent' => 'calendar', 'ref_field' => 'field_event_calendar_section'],
+    'discussion_topic' => ['parent' => 'discussion_space', 'ref_field' => 'field_discussion_disc_space'],
+    'document_page' => ['parent' => 'document_library', 'ref_field' => 'field_document_doc_lib_section'],
+  ];
+}
+
+/**
+ * Get the collab child node types
+ */
+function ma_culturalprotocol_collab_child_node_types() {
+  return array_keys(ma_culturalprotocol_collab_node_types_map());
+}
+
+/**
+ * Get the collab parent node types
+ */
+function ma_culturalprotocol_collab_parent_node_types() {
+  $parent_types = [];
+  foreach (ma_culturalprotocol_collab_node_types_map() as $child_type => $child_type_props) {
+    $parent_types[] = $child_type_props['parent'];
+  }
+  return $parent_types;
+}
+
+/**
+ * Get all the collab node types
+ */
+function ma_culturalprotocol_all_collab_node_types() {
+  return array_merge(['following_notification'], ma_culturalprotocol_collab_parent_node_types(), ma_culturalprotocol_collab_child_node_types());
+}
+
+/**
+ * Internal function used by the helper functions.
+ */
+function _ma_cultural_protocol_get_node_types_in_cps() {
+  return [
+    'optional' => [
+      'collection',
+      'dictionary_word',
+      'word_list',
+      'person',
+    ],
+    'required' => [
+      'digital_heritage',
+      'calendar',
+      'discussion_space',
+      'document_library',
+      'unit_plan',
+    ],
+    'collab_pages' => ma_culturalprotocol_collab_child_node_types(),
+  ];
+}
+
+/**
+ * Helper function returns whether a node type *can* be in a CP (including collab pages)
+ */
+function ma_cultural_protocol_node_type_can_have_cp($node_type) {
+  $node_types = _ma_cultural_protocol_get_node_types_in_cps();
+  if (in_array($node_type, array_merge($node_types['optional'], $node_types['required'], $node_types['collab_pages']))) {
+    return TRUE;
+  }
+}
+
+/**
+ * Helper function returns whether a node type *can* be in a CP (not including collab pages)
+ */
+function ma_cultural_protocol_node_type_can_have_cp_except_hidden($node_type) {
+  $node_types = _ma_cultural_protocol_get_node_types_in_cps();
+  if (in_array($node_type, array_merge($node_types['optional'], $node_types['required']))) {
+    return TRUE;
+  }
+}
+
+/**
+ * Helper function returns whether a node type *must* be in a CP
+ */
+function ma_cultural_protocol_node_type_must_have_cp($node_type) {
+  $node_types = _ma_cultural_protocol_get_node_types_in_cps();
+  if (in_array($node_type, array_merge($node_types['required'], $node_types['collab_pages']))) {
+    return TRUE;
+  }
+}
+
+/**
+ * This is an intermediary function, called by the custom follow-unfollow field.
+ * Need this to avoid error if ma_collaboration_tools is disabled.
+ */
+function ma_culturalprotocol_follow_unfollow($entity) {
+  if (module_exists('ma_collaboration_tools')) {
+    return ma_collaboration_tools_follow_unfollow($entity);
+  }
+}
+
+/**
+ * Implements hook_action_info().
+ */
+function ma_culturalprotocol_action_info() {
+  return [
+    'ma_culturalprotocol_set_node_protocol_action' => [
+      'type' => 'node',
+      'label' => t('Set Cultural Protocols for Content'),
+      'configurable' => TRUE,
+    ],
+    'ma_culturalprotocol_set_atom_protocol_action' => [
+      'type' => 'scald_atom',
+      'label' => t('Set Cultural Protocols for Scald Atoms'),
+      'configurable' => TRUE,
+    ],
+  ];
+}
+
+/**
+ * Form for ma_culturalprotocol_set_node_protocol_action.
+ */
+function ma_culturalprotocol_set_node_protocol_action_form($settings, &$form_state) {
+  $form_description = t('Select the cultural protocol settings to apply to the content. Any existing cultural protocol settings on the content will be replaced with what you select here.');
+  return ma_culturalprotocol_get_set_protocol_form($form_description);
+}
+
+/**
+ * Form for ma_culturalprotocol_set_atom_protocol_action.
+ */
+function ma_culturalprotocol_set_atom_protocol_action_form($settings, &$form_state) {
+  $form_description = t('Select the cultural protocol settings to apply to the Atom(s). Any existing cultural protocol settings will be replaced with what you select here.');
+  return ma_culturalprotocol_get_set_protocol_form($form_description);
+}
+
+function ma_culturalprotocol_get_set_protocol_form($description) {
+  $allowed_protocols = ma_cultural_protocol_get_cps_user_can_post_to();
+  $protocol_ids = array_keys($allowed_protocols);
+  $protocol_nodes = node_load_multiple($protocol_ids);
+
+  $options = [];
+  foreach ($protocol_nodes as $protocol) {
+    $access_value = $protocol->group_access[LANGUAGE_NONE][0]['value'] ?? NULL;
+    if (is_null($access_value)) {
+      continue;
+    }
+    $community_name = t("[Unknown Community]");
+    if ($community_id = $protocol->og_group_ref[LANGUAGE_NONE][0]['target_id'] ?? NULL) {
+      if ($community = node_load($community_id)) {
+        $community_name = $community->title;
+      }
+    }
+    $access_text = $access_value == 0 ? 'Open' : 'Strict';
+    $options[$protocol->nid] = "$community_name: {$protocol->title} ($access_text)";
+  }
+
+  asort($options);
+
+  $sharing_options = [
+    'any' => t('This item may be shared with members of ANY protocol listed.'),
+    'all' => t('This item may only be shared with members belonging to ALL the protocols listed.'),
+  ];
+
+  $form = [];
+  $form['description'] = [
+    '#markup' => "<div><strong>$description</strong></div><br>",
+  ];
+  $form['sharing'] = [
+    '#type' => 'select',
+    '#title' => 'Sharing Setting',
+    '#options' => $sharing_options,
+  ];
+  $form['protocols'] = [
+    '#type' => 'checkboxes',
+    '#title' => 'Select Cultural Protocols',
+    '#options' => $options,
+  ];
+
+  return $form;
+}
+
+
+function ma_culturalprotocol_set_protocol_form_validate($form, &$form_state) {
+  $allowed_protocol_options = ma_cultural_protocol_get_cps_user_can_post_to();
+  $allowed_protocol_ids = array_keys($allowed_protocol_options);
+
+  $protocol_values = $form_state['values']['protocols'] ?? [];
+  $protocols = array_filter($protocol_values, fn($p) => ((int) $p) > 0);
+  $protocol_ids = array_keys($protocols);
+  $invalid_protocol_ids = array_diff($protocol_ids, $allowed_protocol_ids);
+  if (empty($protocols)) {
+    form_set_error('protocols', t("At least one cultural protocol must be selected."));
+  }
+
+  if (!empty($invalid_protocol_ids)) {
+    form_set_error('protocols', t("Please select cultural protocols you have permission to apply."));
+  }
+
+  $sharing_value = $form_state['values']['sharing'] ?? NULL;
+  if (!in_array($sharing_value, ['any', 'all'])) {
+    form_set_error('sharing', t("Select a valid sharing setting."));
+  }
+}
+
+
+/**
+ * Validation for ma_culturalprotocol_set_node_protocol_action.
+ */
+function ma_culturalprotocol_set_node_protocol_action_validate($form, &$form_state) {
+  ma_culturalprotocol_set_protocol_form_validate($form, $form_state);
+}
+
+/**
+ * Validation for ma_culturalprotocol_set_atom_protocol_action.
+ */
+function ma_culturalprotocol_set_atom_protocol_action_validate($form, &$form_state) {
+  ma_culturalprotocol_set_protocol_form_validate($form, $form_state);
+}
+
+/**
+ * Submit handler for ma_culturalprotocol_set_node_protocol_action.
+ */
+function ma_culturalprotocol_set_node_protocol_action_submit($form, &$form_state) {
+  $values = [];
+  $protocol_values = $form_state['values']['protocols'] ?? [];
+  $values['protocols'] = array_filter($protocol_values, fn($p) => ((int) $p) > 0);
+  $values['sharing'] = $form_state['values']['sharing'];
+
+  return $values;
+}
+
+/**
+ * Submit handler for ma_culturalprotocol_set_atom_protocol_action.
+ */
+function ma_culturalprotocol_set_atom_protocol_action_submit($form, &$form_state) {
+  $values = [];
+  $protocol_values = $form_state['values']['protocols'] ?? [];
+  $values['protocols'] = array_filter($protocol_values, fn($p) => ((int) $p) > 0);
+  $values['sharing'] = $form_state['values']['sharing'];
+
+  return $values;
+}
+
+/**
+ * Action for ma_culturalprotocol_set_node_protocol_action.
+ */
+function ma_culturalprotocol_set_node_protocol_action(&$entity, $context) {
+  $content = entity_metadata_wrapper('node', $entity);
+  $content->field_item_privacy_setting->set($context['sharing']);
+  $content->og_group_ref->set($context['protocols']);
+}
+
+/**
+ * Action for ma_culturalprotocol_set_atom_protocol_action.
+ */
+function ma_culturalprotocol_set_atom_protocol_action(&$entity, $context) {
+  $content = entity_metadata_wrapper('scald_atom', $entity);
+  $content->field_item_privacy_setting->set($context['sharing']);
+  $content->field_scald_protocol->set($context['protocols']);
+}

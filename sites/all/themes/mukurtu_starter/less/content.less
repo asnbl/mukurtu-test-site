@@ -1,0 +1,2086 @@
+//// Scald
+@import 'variables.less';
+
+// Scald library (drawer on node view)
+.scald-library {
+  .view-content {
+    li._insert  {
+      display: none;
+    }
+  }
+}
+
+// Reduce the huge file icon size
+.file-icon {
+  width: 20px;
+  height: auto;
+}
+
+// Scald atom add modal
+#modalContent {
+   left: 50px !important;
+   width: 80% !important;
+   height: 800px;
+   overflow-y: auto;
+
+   &.modal-add-to-collection {
+     overflow: hidden;
+   }
+}
+
+.group-scald-addtional-fields {
+   padding-bottom: 1em;
+}
+
+.atom-wrapper {
+   .input-group-btn {
+      font-size: 1em;
+   }
+}
+
+.page-node-edit .ctools-modal-content,.page-node-add .ctools-modal-content {
+
+
+  // Hide the background box
+  background: none !important;
+  border: none !important;
+  width: auto !important;
+
+  // Video upload source pages (choose between Drupal, Youtube, Vimeo, etc., and the follow-up page where you specify the external URL) is the only modal that needs to be sized. The plupload page of the modal sizes cleanly now that the themes are cleaned up.
+
+  // I am unable to use auto values here; have to use static pixel widths, so these values will need to be adjusted when the font size or other styling changes.
+  #scald-atom-add-form-source,.form-item-identifier {
+    width: 610px;
+    #edit-source,#edit-identifier {
+      width: 400px;
+    }
+  }
+
+  // This is the form that appears after files are uploaded or when editing an existing atom
+  #scald-atom-add-form-options {
+
+    .atom-protocol-desc {
+      margin-bottom: 1em;
+    }
+
+  }
+
+}
+
+// Scald HTML 5 player
+.mejs-container {
+    background: #E3E2E1;
+}
+
+.scald-atom.view-mode-mukurtu_scald_dictionary_media .mejs-container {
+    width: 180px !important;
+}
+
+
+//// Popup API
+
+.popup-element-title {
+  background: none;
+}
+
+////
+//// Dashboard video help link
+.video-help-embedded {
+  float: right;
+  width: 400px;
+}
+
+//// All node edits / adds
+
+// Hide the description field on long text fields because we have hacked bootstrap to show them as a tooltip
+.page-node-edit, .page-node-add {
+  .text-format-wrapper .description {
+    display: none;
+  }
+}
+
+// Description (field help text) tooltips
+.tooltip-inner {
+  max-width: 750px;
+  text-align:left;
+}
+
+//// Communities Structure view
+.view-communities-structure {
+  .view-header {
+    margin-bottom: 20px;
+  }
+  .views-table {
+    caption {
+      float: left;
+    }
+    .communities-structure-protocol a {
+      padding-left: 2em;
+    }
+  }
+}
+
+// general fields
+
+.node-teaser {
+  .row {
+    padding-bottom: 30px;
+  }
+}
+
+.field, .cke_editable {
+  .label-inline {
+    float:left;
+    font-weight: bold;
+  }
+  .label-above, .field-label {
+    font-weight:bold;
+    text-transform: uppercase;
+  }
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+  }
+}
+
+.dnd-atom-wrapper.type-audio.context-sdl_editor_representation {
+  .fluid-width-video-wrapper {
+    height: 18px;
+    width: 180px
+  }
+}
+
+.ds-2col, .ds-2col-stacked {
+  .field {
+      margin-bottom: 10px;
+  }
+  .group-left {
+    .label-above {
+      font-size: 22px;
+    }
+  }
+}
+
+.node {
+    // Common
+    &.view-mode-full,
+    &.view-mode-search_result {
+       .field {
+            margin-bottom: 10px;
+            .label-inline {
+                width: 100px;
+            }
+        }
+        .col-sm-12 {
+            .field {
+                .label-inline {
+                    width: auto;
+                }
+            }
+        }
+        .col-sm-8 {
+            .label-above {
+                font-size: 22px;
+            }
+        }
+
+        .col-xs-4 {
+            .field-name-field-media-asset {
+                width: 100%;
+            }
+        }
+    }
+
+    // Search results specific
+     &.view-mode-search_result {
+        .col-xs-4,
+        .col-xs-8 {
+            width: 100%;
+        }
+        @media (min-width: @screen-sm-min) {
+            .col-xs-4 {
+                width: 50%;
+            }
+            .col-xs-8 {
+                width: 50%;
+            }
+        }
+    }
+}
+
+.pane-title {
+    .fa-caret-right {
+        display: none;
+    }
+    .fa-caret-down {
+        display: inline;
+    }
+}
+
+.collapsed {
+    .pane-title {
+        .fa-caret-right {
+            display: inline;
+        }
+        .fa-caret-down {
+            display: none;
+        }
+    }
+}
+
+// Dictionary Browse
+.page-dictionary {
+    .dictionary-facets {
+        background: #fff;
+    }
+
+    .dictionary-facets-region {
+        margin: auto;
+        float: none;
+
+        .panel-pane {
+            padding: 10px 15px 10px 15px;
+        }
+
+        .pane-block {
+            .pane-content {
+                padding: 0px;
+                #edit-search-api-views-fulltext-wrapper {
+                    padding: 10px 0px 10px 0px;
+                }
+            }
+        }
+
+        // Facet Dropdowns
+        .dropdown {
+            button {
+                height: 40px;
+                width: 100%;
+                text-align: left;
+            }
+        }
+
+        .dropdown-menu {
+            width: 100%;
+            ul {
+                padding-left: 10px;
+
+                li {
+                    list-style-type: none;
+
+                    a {
+                        &.facetapi-checkbox {
+                            padding-left: 5px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Exposed fiew form, text search
+    .pane-views-exp-dictionary-words-all {
+        // Hide title
+        .pane-title {
+            display: none;
+        }
+
+        // Hide label
+        #edit-search-api-views-fulltext-wrapper {
+            padding: 10px 15px 10px 15px;
+            clear: left;
+
+            label {
+                display: none;
+            }
+        }
+
+        .views-exposed-widget {
+            padding: 10px 5px 10px 5px;
+
+            // Submit/Reset buttons
+            input,
+            button,
+            .btn {
+                width: 100%;
+                margin-top: 0px;
+            }
+        }
+    }
+
+    // A-Z glossary facet
+    .facet-glossary {
+        padding-top: 30px;
+        padding-bottom: 30px;
+        margin-left: 20px;
+        background: none;
+        >a {
+            display: none;
+        }
+
+        .facetapi-search-api-glossary {
+            width: 100%;
+
+            // Tablet
+            @media (min-width: @screen-sm-min) {
+                display: table;
+            }
+
+            // Don't display glossary letters that aren't clickable, on small screens
+            .no-content {
+                display: none;
+
+                // Tablet
+                @media (min-width: @screen-sm-min) {
+                    display: table-cell;
+                }
+            }
+
+            .active {
+                font-weight: bold;
+                color: @text-color;
+            }
+
+            li {
+                display: inline;
+                // Tablet
+                @media (min-width: @screen-sm-min) {
+                    display: table-cell;
+                    width: 3%;
+                }
+
+                a {
+                    font-weight: bold;
+                    font-size: 17px;
+                }
+            }
+        }
+    }
+}
+
+.node-dictionary-word.view-mode-dictionary_word_summary {
+    .field-name-field-word-entry {
+        div.paragraphs-item-dictionary-word-bundle {
+            // Hide additional entries
+            display: none;
+            margin-bottom: @grid-gutter-width;
+            background-color: #F8F7F7;
+            padding-bottom: 30px;
+
+            // Desktop
+            @media (min-width: @screen-md-min) {
+                height: 290px;
+            }
+
+            .field {
+                width: 100%;
+                padding-left: 10px;
+                padding-top: 10px;
+
+                // Tablet
+                @media (min-width: @screen-sm-min) {
+                    padding-left: 30px;
+                }
+            }
+
+            .field-name-field-alternate-spelling {
+                background-color: #E3E2E1;
+                background-size: 18px;
+                height: 68px;
+                padding: 0px 0px 0px 10px;
+
+                a {
+                    display: inherit;
+                    font-size: 26px;
+                    //color: @mukurtu-dictionary-term-title-color;
+                    padding-left: 20px;
+                    line-height: 68px;
+                }
+            }
+
+            .field-name-field-translation {
+                font-weight: bold;
+                font-size: 20px;
+            }
+
+            .field-name-field-dictionary-word-recording {
+                .field-label {
+                    font-size: 17px;
+                }
+
+                .field-item {
+                    padding-right: 30px;
+                    .group-left {
+                        width: 80%;
+                    }
+                }
+            }
+        }
+
+        // Show first entry
+        div:first-of-type {
+            display: block;
+        }
+    }
+}
+
+.view-dictionary-words {
+    background: none;
+    .view-content {
+        .views-row {
+            border-bottom: none !important;
+            padding: 0px !important;
+        }
+    }
+}
+
+.mejs__container {
+  // Shrink controls on mobile
+  //max-width: 240px;
+  max-width: 100%;
+
+  // Tablet
+  @media (min-width: @screen-sm-min) {
+      //max-width: 300px;
+      //max-width: 100%;
+  }
+
+  // Desktop
+  @media (min-width: @screen-md-min) {
+      //max-width: 330px;
+  }
+
+  // Large Desktop
+  @media (min-width: @screen-lg-min) {
+      //max-width: 100%;
+  }
+
+    .mejs__controls {
+        // Hide volume controls when screen is small
+        .mejs__horizontal-volume-button,
+        .mejs__mute,
+        .mejs__horizontal-volume-slider {
+            display: none;
+
+            // Tablet
+            @media (min-width: @screen-sm-min) {
+                display: block;
+            }
+        }
+    }
+}
+
+// Log in/Log out menu
+  .mukurtu-login-menu {
+    float: right;
+    background: #474440;
+    margin-top: -20px;
+	border-radius: 0px 0px 0px 5px;
+	ul {
+		list-style-type: none;
+		text-align: center;
+		padding-left: 0px;
+		margin-bottom: 4px;
+
+        li {
+            a {
+                font-size: 16px;
+                color: #F5F5F5;
+                padding: 6px 10px;
+            }
+        }
+	}
+}
+
+// Browse Collections
+.page-collections {
+    .view-mode-collections_browse {
+        .row {
+            background: #F5F5F5;
+        }
+
+        .large-teaser-image {
+            padding: 0px;
+        }
+    }
+     // Full text search widget
+     .pane-views-exp-collections-all,
+     // Sort Widget
+     .pane-ma-search-api-ma-custom-sorts {
+         margin: 0 auto;
+         width: 350px;
+
+         .pane-content {
+             padding: 5px 10px;
+         }
+         .views-exposed-form {
+             .views-widget-filter-search_api_views_fulltext {
+                 .views-widget {
+                     width: 200px;
+                 }
+             }
+            .views-exposed-widgets {
+                margin: 0 auto;
+                width: 300px;
+            }
+            .views-exposed-widget {
+                padding: 5px;
+                .form-submit {
+                    margin-top: 0px;
+                }
+            }
+         }
+     }
+    .view-content {
+        .views-row {
+            padding: 10px 0px;
+        }
+    }
+}
+
+// Custom Mukurtu Collapsed/Collapsible div -- looks just like the other fields but collapsible with a dynamic arrow
+.mukurtu-collapsed-fieldset-div {
+  h3 {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 22px;
+  }
+  .field-group-format-toggler a {
+    background: url(../grey-down-arrow.png) no-repeat left center;
+    color: #333;
+    padding-left: 15px;
+    text-decoration: none;
+  }
+  &.collapsed .field-group-format-toggler a {
+    background-image: url(../grey-right-arrow.png);
+  }
+}
+
+//// Collections SAPI page
+.view-collections-grid-list {
+  .field-name-collections-title-with-count {
+    font-size: 30px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    line-height: 1.1;
+    font-weight: 200;
+  }
+}
+
+//// Digital Heritage node form
+
+.node-type-digital-heritage, .page-node-add-digital-heritage {
+
+  // The following is taken from former mukurtu_protocol_field.css
+  /* hiding the og ref field for digital heritage items */
+  div.form-item table .form-type-textfield,
+  div.form-item table .form-type-textfield * {
+
+  }
+
+  #edit-field-original-date .help-block {
+    clear: both;
+    margin: 0;
+    margin-top: 50px;
+    padding: 0;
+  }
+
+  // Original Date field
+  #field-original-date-add-more-wrapper {
+    .form-group {
+      margin-bottom: 0;
+    }
+  }
+
+}
+
+//// Community node form
+
+.node-type-community, .page-node-add-community {
+
+  #edit-group-access {
+    display:none;
+  }
+}
+
+// Dictionary Word node form
+#dictionary-word-node-form {
+
+  #dewplayer-2, #dewplayer-1 {
+    height: 20px;
+  }
+
+}
+
+// Dictionary Word full node view
+.node-dictionary-word.view-mode-full, .node-word-list.view-mode-full {
+
+  .scald-atom, .scald_video, .fluid-width-video-wrapper {
+    margin-bottom: 10px;
+  }
+  #dewplayer-2, #dewplayer-1 {
+    height: 20px;
+  }
+  .group-left {
+    width: 66%
+  }
+  .group-right, .metadata-sidebar {
+    width: 30%;
+    background: #f8f7f7 none repeat scroll 0 0;
+    border-radius: 4px;
+    padding: 30px;
+  }
+  .group-right .fluid-width-video-wrapper {
+    padding-bottom: 3.5%;
+  }
+  .group-footer {
+    padding-top: 20px;
+
+   .label-above {
+     font-size: 14px;
+   }
+  }
+  .sample-sentence {
+    padding-bottom: 10px;
+  }
+}
+
+// Dictionary Word entry (paragraphs)
+.paragraphs-item-dictionary-word-bundle.view-mode-full {
+    div {
+	margin-bottom: 0px;
+    }
+
+    .field {
+	padding-bottom: 10px;
+    }
+
+    .field-name-field-alternate-spelling {
+	margin-bottom: 10px;
+	border-bottom: 1px solid #dddddd;
+	font-size: 24px;
+    }
+
+    .field-name-field-source {
+    }
+
+    .group-left, .group-middle, .group-right {
+	width: 30%;
+	margin-left: 20px;
+    }
+
+    .group-right {
+	background: none;
+	padding: 0px;
+	border-radius: 0px;
+    }
+
+    .label-above {
+	font-size: 14px;
+    }
+
+    .field-name-field-entry-title {
+	font-size: 22px;
+    }
+
+    .fluid-width-video-wrapper {
+	height: 20px;
+    }
+
+    .scald-atom {
+	margin-bottom: 0px;
+    }
+
+    padding-bottom: 20px;
+}
+
+.node-dictionary_word-form {
+    .field-group-accordion-wrapper {
+        .field-group-format-wrapper {
+    	    padding: 10px;
+    	}
+     }
+}
+
+//// Digital Heritage grid/list view
+
+//// Grid/List Views (DH, Collections, Dictionary)
+
+// toggle display via the grid/list clicker
+
+.view-digital-heritage-grid-list,
+.view-collections-grid-list,
+.view-dictionary-words {
+  .view-header {
+    //float:right;
+    padding-bottom: 10px;
+    margin-right: 20px;
+
+    a {
+      font-weight: 200;
+      color: @link-color;
+      padding: 2px 8px;
+      &.active {
+        color:white;
+        background: @gray;
+      }
+    }
+  }
+
+  &.list-view {
+    .node-digital-heritage.view-mode-search_result > div {
+      padding:0;
+    }
+    .view-content {
+      .views-row {
+        border-bottom: 1px solid #ECEBEB;
+        margin: 30px 0;
+        padding: 0 0 30px 0;
+        &.views-row-first {
+          margin-top:0;
+        }
+
+        .field-name-field-media-asset {
+          right:0;
+        }
+      }
+    }
+  }
+  &.grid-view {
+    padding-top: 60px;
+
+    .view-header {
+        position: absolute;
+        top: 0;
+    }
+
+    .view-content {
+        height: 100%;
+    }
+
+    // Pager
+    .text-center {
+        width: 100%;
+        float: left;
+        margin-top: 10%;
+    }
+
+    .views-row {
+        width: 100% !important;
+        float: left;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+
+        // Tablet
+        @media (min-width: @screen-sm-min) {
+            width: 45% !important;
+        }
+
+        // Desktop
+        @media (min-width: @screen-md-min) {
+            width: 30% !important;
+        }
+
+        // Extra large Desktop
+        @media (min-width: 1600px) {
+            width: 20% !important;
+        }
+    }
+
+    .view-mode-search_result {
+      .field {
+          display: none;
+      }
+      .field-name-title,
+      .field-name-field-media-asset {
+          display: block;
+
+          h2 {
+              font-size: 16px;
+              font-weight: bold;
+          }
+      }
+
+      .field-name-field-media-asset img {
+          width: 100%;
+      }
+
+      .col-xs-4,
+      .col-xs-8,
+      .col-sm-4,
+      .col-sm-8 {
+        width: 100%;
+      }
+    }
+  }
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+#edit-search-api-views-fulltext-wrapper label {
+  display: none;
+}
+
+// Dictionary-specific Grid / List view
+.view-dictionary-words {
+
+  .field-name-download-atom {
+    display: none;
+  }
+  .fluid-width-video-wrapper {
+    height: 20px;
+  }
+
+  .field {
+    margin-bottom: 5px;
+  }
+
+  .field-name-field-dictionary-word-recording {
+    width: 190px; // cannot set width to 100% or else it will fill the column in list view. Cannot use separate widths for list and grid views because mediaelement renders the atom once, and will not respond to our grid-list JS+CSS switcher. Thus, the list view atom is 190px wide (equal to the grid view) which is slightly smaller than the list view atom thumbnails on the DH browse list view (220px). This is not an issue in the other grid/list views because we don't show atoms there, only their thumbnails. Here we want to show the atoms, to be playable right on the search page.
+  }
+
+   &.list-view {
+      .views-row {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+  }
+
+  &.grid-view {
+    .dictionary-list-fields {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    // do not show field labels in grid view
+    .label-above {
+      display: none;
+    }
+    // fields to not show in grid view
+    .field-name-field-translation {
+      display: none;
+    }
+  }
+}
+
+// Word Lists
+.node-word-list {
+    .paragraphs-item-dictionary-word-bundle {
+        .ui-accordion-header {
+	    background: none;
+        }
+    }
+
+    .field-name-field-translation {
+       width: 100%;
+    }
+
+    .view-mode-mukurtu_scald_dictionary_media {
+       height: 20px;
+     }
+}
+
+// facets on the dictionary grid/list view
+
+.facetapi-facet-title-az-glossary {
+  overflow: hidden;
+  li {
+    font-size: 18px;
+    float: left;
+    margin-right: 0.5em;
+  }
+}
+
+
+// DH Map View
+.view-display-id-all_map {
+  .view-mode-map_popup {
+    h3 {
+      margin-top: 0;
+    }
+  }
+}
+
+
+
+// Shared styling for CP and Community nodes
+
+.node-community, .node-cultural-protocol-group {
+  .group-left {
+    width: 66%;
+    float: left;
+  }
+  .group-right {
+    width: 30%;
+    float: right;
+  }
+
+  .field-name-group-management-links {
+    background: #f8f7f7 none repeat scroll 0 0;
+    border-radius: 5px;
+  }
+
+  // Blocks in right column
+  .group-right .block-views, .group-right .field,
+  .metadata-wrapper .block-views, .metadata-wrapper .field {
+    background: #F8F7F7;
+    border-radius: 5px;
+    h2.block-title, .label-above {
+      background: #E3E2E1;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      padding: 5px 10px;
+      padding: 10px 20px;
+      font-size: 140%;
+      font-weight: 400;
+      text-transform: none;
+    }
+    .view-content, .view-footer, ul {
+      padding-left: 20px;
+      padding-bottom: 10px;
+    }
+    .dh-notifications {
+      padding: 10px 20px 10px 20px;
+    }
+    ul {
+      padding-top: 10px;
+    }
+    margin-bottom: 2em;
+  }
+}
+
+// Collaboration Pages
+.node-calendar.view-mode-full, .node-event.view-mode-full {
+
+  // Blocks in right column
+  .group-right, .metadata-sidebar {
+    .panel, .right-col-block {
+      background: #F8F7F7;
+      border-radius: 5px;
+      border-color: #ddd !important;
+      border: 1px solid;
+      margin-bottom: 20px;
+      .view {
+        padding: 15px;
+      }
+    }
+    .right-col-block .label-above, .panel-title {
+        font-size: 20px;
+        font-weight: 400;
+        text-transform: none;
+    }
+    .right-col-block .label-above, .panel-heading {
+      background: #E3E2E1;
+    }
+    .right-col-block .label-above {
+      padding: 10px 15px;
+    }
+  }
+}
+
+// this section should probably be within the node views
+.field-name-protocol-dh-items,
+.field-name-community-dh-items {
+  padding-top:20px;
+  border-top:1px solid #ECEBEB;
+
+  .view-community-dh-items {
+    .view-content {
+      .views-row {
+        border-bottom: 1px solid #ECEBEB;
+        margin: 30px 0;
+        padding: 0 0 30px 0;
+        &.views-row-first {
+          margin-top:0;
+        }
+        .field {
+          margin-bottom: 0px;
+        }
+      }
+    }
+  }
+}
+
+.panel-panel .right-pane,
+.pane-block {
+  background: #F8F7F7;
+  border-radius: 5px;
+  h2.pane-title {
+    background: #E3E2E1;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding: 10px 20px;
+    font-size: 140%;
+    font-weight: 400;
+  }
+  .pane-content {
+    padding-left:20px;
+    padding-right:20px;
+    padding-bottom:10px;
+    .view-content {
+      line-height:25px;
+    }
+
+    ul.search-api-sorts {
+       padding-left: 0px;
+
+       li {
+          list-style: none;
+       }
+    }
+  }
+}
+
+// Can this go?
+.management-links {
+  margin-top: 15px;
+  .pane-content {
+    padding-bottom: 0;
+    a.btn:hover {
+      color:@link-hover-color;
+    }
+  }
+}
+
+// facets
+.facetapi-processed {
+  padding-bottom: 10px;
+  padding-left: 0;
+  input[type="radio"], input[type="checkbox"] {
+    margin: 7px 8px 7px 0;
+  }
+}
+
+// Tooltips
+a.tooltips span {
+
+}
+
+
+
+//// Banner images (Community and Cultural Protocol nodes)
+
+// Shrink or expand the banner image to full width and then set height to auto to maintain aspect ratio. User is expected to upload an appropriately proportioned image for the banner
+
+.field-name-field-protocol-image, .field-name-field-community-image {
+  .field-name-scald-thumbnail img {
+    width:100%;
+    height:auto;
+  }
+}
+
+//// Organic Groups Add and Manage Members links
+.add-manage-members-links {
+  margin-top: 1em;
+}
+
+.nav-top-wrapper {
+  background: #474440;
+}
+.navbar-top {
+  &.navbar.container {
+    margin-top: 0;
+  }
+  background:none;
+  border:none;
+  border-radius:0;
+
+  ul.dropdown-menu {
+    background-color: #474440;
+    padding: 5px 5px;
+  }
+
+  ul.nav {
+    width:100%;
+    li {
+      background: #585551;
+      margin: 8px 2px;
+      &.last.collapsed {
+        float:right;
+        border-radius: 4px;
+        border: 1px solid #979797;
+        background:none;
+      }
+
+      a {
+        color: #F5F5F5;
+        padding: 6px 10px;
+      }
+      &.leaf:hover {
+        a {
+          color: #474440;
+        }
+      }
+    }
+  }
+}
+
+.navbar-bottom {
+  border:none;
+  border-radius:0;
+  background:none;
+  ul.nav {
+    margin-top:10px;
+    li {
+      border:1px solid #E3E2E1;
+      border-radius: 4px;
+      background:white;
+      margin:10px;
+      a {
+        color: #595855;
+        padding: 14px 22px;
+        font-size:20px;
+      }
+      &.active,
+      &:hover {
+        border:1px solid #E4E2E1;
+        background: #E4E2E1;
+        a {
+          color: black;
+        }
+      }
+    }
+  }
+}
+
+#navbar {
+  margin-bottom:0;
+  background:#F8F7F7;
+}
+#page-header .navbar-default {
+  margin:0 0 20px 0;
+
+
+}
+
+
+.node-type-digital-heritage {
+
+  .group_scald_atom_metadata {
+    .popup-element {
+      width: 100%;
+      text-align: right;
+      height:20px;
+    }
+  }
+  .group_scald_atom_metadata {
+    border-bottom:1px solid #ECEBEB;
+    padding-bottom:10px;
+    margin-bottom:10px;
+  }
+  .view-mode-search_result {
+    .field {
+      margin-bottom: 0;
+    }
+
+
+  }
+}
+
+// DH full node and Community Record views
+.node-digital-heritage.view-mode-full, .node-digital-heritage.view-mode-community_record {
+  .scald-atom {
+    margin-bottom: 2.5em;
+    .scald-file-icon {
+      //  display: none;
+    }
+  }
+  .group-right, .metadata-sidebar {
+    background: #f8f7f7 none repeat scroll 0 0;
+    border-radius: 4px;
+    padding: 30px;
+  }
+
+  // TK Labels
+  .field-name-field-licence-trad {
+    width: 299px;
+    .popup-element {
+      .popup-element-title img {
+        width: 88px; // Make TK Label image the same width as Licensing Options image
+        margin-top: 5px;
+      }
+      // 2 per row
+      width: 100px;
+      float: left;
+    }
+  }
+
+  // Related DH nodes (bottom)
+  .view-mode-search_result {
+    border-bottom: 1px solid #ecebeb;
+    margin-bottom: 2em;
+    padding-bottom: 2em;
+    .scald-atom {
+      margin-bottom: 0;
+    }
+  }
+
+  // Related Dictionary Words (bottom)
+  .view-mode-search_result {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 15px !important;
+    .label-above {
+      font-size: 14px;
+    }
+    #dewplayer-2, #dewplayer-1 {
+      height: 20px;
+    }
+    .field-name-download-atom {
+      display: none;
+    }
+    .field-name-field-dictionary-word-recording {
+      width: 190px; // see comment on this in the Dictionary Words search results list view formatting
+      float: right;
+      margin-top: -40px;
+      margin-right: 20px;
+      margin-left: 20px;
+    }
+  }
+
+
+  // Related DH Nodes Teasers (top right)
+  .view-dh-related-items-teasers {
+    .scald-atom {
+      margin-bottom: 0em;
+    }
+    .views-field-field-media-asset {
+      margin-bottom: 0.5em;
+    }
+    .views-field-title {
+      font-size: 1.4em;
+      margin-bottom: 0.5em;
+    }
+  }
+
+}
+// DH Book Pages Navigation -- this needs to go outside of the view modes because it is rendered in a hook_page_alter, not within the node
+.dh-book-nav {
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  .nav-button {
+    padding-right: 20px;
+  }
+  margin-bottom: 15px;
+}
+
+// DH Table of Contents (1st page of book)
+.dh-book-toc {
+  margin-bottom: 2em;
+
+  // Make the TOC header look like a regular field header
+  h3.dh-book-toc-header {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 22px;
+    margin-top: 0;
+  }
+}
+
+// DH Multipage Carousel Styling
+.page-number {
+  text-align: center;
+}
+.owl-carousel {
+    padding-bottom: 20px;
+}
+.owl-item .selected .page-number {
+    background: #e59637;
+}
+.owl-item .selected a {
+    color: white;
+}
+.owl-nav {
+    color: #337ab7;
+}
+.owl-prev, .owl-next {
+    float: left;
+    width: 20%;
+    margin-top: 10px;
+}
+.owl-prev {
+    margin-right: 30%;
+}
+.owl-next {
+    text-align: right;
+    margin-left: 30%;
+}
+#mulitpage-select {
+    position: relative;
+    top: -20px;
+    width: 50%;
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-bottom: 0px;
+    z-index:10;
+}
+
+.node-digital-heritage.view-mode-full .owl-carousel {
+  .owl-nav .owl-prev, .owl-nav .owl-next {
+    color: #337ab7;
+  }
+
+  .owl-next {
+    float: right;
+    text-align: center;
+  }
+}
+
+// collection node DH list view
+.field-name-field-digital-heritage-items {
+  .group-list-view-fields {
+    padding:0;
+  }
+  .node-digital-heritage {
+    border-bottom: 1px solid #ECEBEB;
+    margin: 30px 0;
+    padding: 0 0 30px 0;
+  }
+  .label-above {
+    margin-bottom: -30px;
+  }
+}
+
+
+// TK Label Customization form
+#license-custom-tk-label-text-form, .group-custom-tk-label-text {
+  .filter-wrapper {
+    display: none;
+  }
+  .help-block {
+    font-weight: bold;
+    font-size: 1.3em;
+  }
+}
+
+
+
+@media (max-width: @screen-md-min) {
+  .ds-2col > .group-left {
+    width: auto;
+    float:none;
+  }
+  .ds-2col > .group-right {
+    width: auto;
+    float: none;
+  }
+}
+
+@media (min-width: @screen-md-min) {
+  .navbar .logo {
+    margin: 10px 0 20px;
+  }
+  .ds-2col > .group-left {
+    width: 66%;
+    float: left;
+  }
+  .ds-2col > .group-right {
+    width: 30%;
+    float: right;
+  }
+
+  .panel-2col-stacked .panel-col-last {
+    float: right;
+    width: 40%;
+  }
+
+  .panel-2col-stacked {
+    .panel-col-first {
+      float: left;
+      width: 73%;
+    }
+    .panel-col-last {
+      float: right;
+      width: 25%;
+    }
+
+  }
+}
+
+
+/* Dashboard theming **/
+
+
+#homebox .homebox-portlet {
+  .homebox-portlet-inner {
+    border:none;
+  }
+  h3.portlet-header {
+    background: #E3E2E1;
+    padding: 10px 15px;
+    font-size: 140%;
+    font-weight: 400;
+  }
+  .portlet-content {
+    padding:10px 15px;
+    dd {
+      margin-bottom:10px;
+      color: #666;
+    }
+    dt {
+      font-weight: normal;
+    }
+    .view-content {
+      ul {
+        padding-left: 0px;
+        margin-top:5px;
+        list-style:none;
+        li {
+          margin-bottom:10px;
+        }
+      }
+    }
+  }
+}
+
+// wizard
+#block-mukurtu-splash-mukurtu-wizard {
+  h2.block-title {
+    display:none;
+  }
+  .btn {
+    margin-bottom: 10px;
+  }
+  .ui-widget-content {
+    border: 1px solid #aaa;
+  }
+  .ui-tabs {
+    padding: 0.2em;
+    position: relative;
+  }
+}
+.wizard-tabs {
+  margin-bottom:10px;
+  .ui-tabs-nav {
+    background:none;
+    border:none;
+    border-radius:0;
+    line-height: 28px;
+    padding:0;
+    li {
+      background: #585551;
+      margin: 0;
+      padding: 0;
+      a {
+        color: #F5F5F5;
+        padding: 6px 10px;
+      }
+      &:hover,
+      &.ui-state-active {
+        background: #e7e7e7;
+        a {
+          color: #474440;
+        }
+      }
+    }
+  }
+  .ui-tabs-panel {
+    padding: 0 20px 20px 20px;
+    border-style: solid none none;
+    border-top-width: 1px;
+    border-top-color: #aaa;
+    a {
+      color:@link-color;
+    }
+  }
+}
+
+.masonry-grid {
+  .masonry-brick {
+    width: 227px;
+
+  }
+}
+
+// dont know why this needs to be added
+.ui-tabs .ui-tabs-hide {
+  display: none !important;
+}
+
+// Fix Google map display inside of quicktabs (eg. for Community Records) (taken from https://www.drupal.org/node/352247#comment-9592623)
+.quicktabs_main {
+  position: relative;
+}
+.quicktabs-tabpage {
+  display: block;
+  visibility: visible;
+  width: 100%;
+}
+.quicktabs-tabpage.quicktabs-hide {
+  display: block;
+  visibility: hidden;
+  top: 0px;
+  left: 0px;
+  position: absolute;
+  z-index: -1;
+}
+
+// DH management page
+.form-item-operation {
+    padding-left: 15px;
+}
+
+// Person Content Type
+.person.metadata {
+    background: #f8f7f7 none repeat scroll 0 0;
+    border-radius: 4px;
+    padding: 30px;
+}
+
+.person.metadata .field {
+    margin-bottom: 10px;
+}
+
+.group-person-media {
+    padding-bottom: 20px;
+}
+
+.node-person {
+   .field-name-field-node-aggregate {
+      clear: both;
+      padding-top: 30px;
+   }
+
+   .field-name-field-related-people {
+      clear: both;
+   }
+
+   .paragraphs-item-person-relationship-bundle {
+      clear: both;
+   }
+
+   .paragraphs-items-field-sections {
+      clear: both;
+      padding-bottom: 30px;
+   }
+
+   .view-mukurtu-records-referenced-content {
+     padding-top: 10px;
+   }
+
+   .tableofcontents {
+      clear: both;
+      padding-bottom: 30px;
+      font-weight: bold;
+   }
+
+   .owl-nav .owl-prev, .owl-nav .owl-next {
+      color: #337ab7;
+   }
+
+   .owl-next {
+      float: right;
+      text-align: center;
+   }
+}
+
+
+// Taxonomy Records
+.view-mode-taxonomy_record_teaser {
+    padding-bottom: 20px;
+    border-top: #dddddd;
+    border-top-style: solid;
+    border-top-width: 1px;
+}
+
+.table-responsive {
+   overflow-x: visible !important;
+   overflow-y: visible !important;
+}
+
+// Hide the honeypot field. The CSS to do this should be generated automatically by honeypot, and it is (in private files), but since it's in private files, it's access denied. The issue should have been addressed, but isn't, in https://www.drupal.org/project/honeypot/issues/2977351.
+.email-textfield { display: none !important; }
+// Add to Collection modal
+.modal-add-to-collection {
+  overflow: hidden;
+  // The default position is too close to the top of the screen.
+  // top: 200px !important; // This only works in the full node view.
+  // TODO: get the modal to center vertically, or perhaps position where the mouse was clicked.
+
+  // Hide the header. Instead we add a cancel button. Keep the modal smaller.
+  .modal-header {
+    display: none;
+  }
+
+  .loading-spinner {
+    display: none; // width below not positioned properly, so simply hiding the spinner. It's a quick load and shouldn't matter. If there turns out to be sites with many, many Collection / Personal Collections and the modal loads slowly, then look at this again.
+    // width: 100% !important; // Need to fill to max as the default fixed width no good for dynamic width modal.
+   //  top: 25px !important;  // With the hidden header, we need to slightly reposition the spinner.
+  }
+}
+
+// Collections tree. Based on http://odyniec.net/articles/turning-lists-into-trees/.
+
+.collections-tree {
+
+  ul {
+    background: url(../collection_tree/vline.png) repeat-y;
+    margin-left: 10px;
+    padding: 0;
+  }
+  li {
+    padding: 0 12px;
+    line-height: 20px;
+    background: url(../collection_tree/node.png) no-repeat;
+    list-style-type: none;
+  }
+  li.last {
+    background: #fff url(../collection_tree/lastnode.png) no-repeat;
+  }
+  .parent {
+    background: none !important;
+  }
+  .current {
+    font-weight: bold;
+  }
+}
+.class-collections-tree-popup {
+  ul.collections-tree {
+    padding: 0;
+    margin: 0;
+  }
+  a {
+    color: #337ab7 !important;
+    text-decoration: none !important;
+  }
+  // Dynamic width (expand to whatever size is required to fit contents)
+  td.center {
+    white-space: nowrap;
+    .inner {
+      width: auto !important;
+    }
+  }
+
+}
+
+// File Fixity
+.view-mode-full {
+  .field-name-fixity-reports {
+    .label-above {
+      font-size: 1.5em;
+      text-transform: capitalize;
+      margin-top: 1em;
+    }
+    .views-row {
+      padding-bottom: 1em;
+      border-bottom: solid;
+      border-width: 1px;
+    }
+    .field-name-field-fixity-check-fails-details {
+      ul {
+        padding-left: 30px;
+        list-style-type: disc;
+        .fail {
+          color: red;
+        }
+        .pass {
+          color: green;
+        }
+        p {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+.fixity-check-fail-status {
+  font-weight: bold;
+  color: red;
+  text-transform: uppercase;
+}
+.fixity-check-pass-status {
+  font-weight: bold;
+  color: green;
+  text-transform: uppercase;
+}
+
+
+// Events
+// Based on OA, then modified.
+.event-date-wrapper {
+  height: 5em;
+  width: 5em;
+  margin: 5px;
+  margin-left: 0px;
+  border: 1px solid #AAA;
+  background: #F6F7FC;
+  float: left;
+  font-size: 10px;
+}
+
+.event-date-month-wrapper {
+  height: 1.4em;
+  background: #4791FF;
+  margin: 2px;
+}
+
+.event-date-month {
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  display: block;
+  text-align: center;
+  font-size: 1em;
+  font-weight: normal;
+  color: #FFFFFF;
+}
+
+
+.event-label {
+  font-weight: bold;
+  float: left;
+  height: 0;
+}
+
+.event-item {
+  display: inline-block;
+  font-size: 1em;
+  padding-left: 8ex;
+  line-height: 1.4em;
+}
+
+.event-date-day {
+  display: block;
+  font-size: 2.5em;
+  line-height: 120%;
+  text-align: center;
+}
+
+.event-day,
+.event-time {
+  white-space: nowrap;
+}
+
+.event .addthisevent-drop {
+  margin: 10px;
+  float: right;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+.event-location .field-content {
+  display: inline-block;
+}
+
+.event-description .flag-subscribe-section-content {
+  display: none;
+}
+
+.event-header .event-icon {
+  float: left;
+  padding-right: 10px;
+}
+
+.event-header .location {
+  padding-top: 20px;
+}
+
+.event-details {
+  overflow: hidden;
+}
+
+.event-description ul,
+.event-list li {
+  list-style: none;
+}
+
+.view-oa-event-list li {
+  overflow: hidden;
+  clear: both;
+}
+
+// Events not based on OA
+.node-event.view-mode-full {
+
+  // Calendar icon
+  .event-date-wrapper {
+    height: 7em !important;
+    width: 7em !important;
+    .event-date-month-wrapper {
+      height: 1.96em !important;
+    }
+    .event-date-month {
+      font-size: 1.4em !important;
+    }
+    .event-date-day {
+      font-size: 3.5em !important;
+    }
+  }
+
+  // Fields to the right of calendar icon
+  .group-event-details {
+    .label-inline {
+      width: 70px;
+      text-align: right;
+    }
+    .field-name-field-oa-address, .field-name-field-oa-date, .field-name-calendar-date {
+      margin-bottom: 0.1em !important;
+    }
+  }
+
+  .field-name-body, .comment-wrapper {
+    clear: both;
+  }
+  .field-name-body {
+    font-size: 1.3em;
+  }
+}
+
+// Follow / Unfollow notification text.
+.field-name-follow-unfollow {
+  .notifications-message {
+    margin-top: 5px;
+  }
+}
+
+// Following / Notification popup.
+.class-follow-unfollow-popup {
+  a {
+    color: #337ab7 !important;
+    text-decoration: none !important;
+  }
+  a:hover, a:focus {
+    color: #23527c !important;
+  }
+  .notification-popup-reasons-header {
+    font-weight: bold;
+  }
+  ul {
+    padding: 0;
+    margin: 0;
+    margin-left: 10px;
+    margin-bottom: 1em;
+  }
+  li {
+    margin-left: 1em;
+  }
+  // The notification node frequency form in the popup.
+  .form-item-notification-frequency-node {
+    label {
+      float: left;
+      margin-right: 0.5em;
+      font-weight: bold;
+    }
+    .form-control {
+      width: auto;
+    }
+  }
+  button {
+    display: none
+  }
+  .link-to-following-view {
+    font-weight: bold;
+  }
+}
+
+// The notification default frequency form in the header of the Following view.
+.view-mukurtu-collab-subscriptions #ma-collaboration-tools-notification-frequency-default {
+  label {
+    float: left;
+    margin-right: 0.5em;
+  }
+  .form-control {
+    width: auto;
+  }
+  button {
+    display: none
+  }
+}
+
+// The notification node frequency form per node in the Following view.
+.view-mukurtu-collab-subscriptions .views-field-php-2 {
+  label {
+    display: none;
+  }
+  .form-control {
+    width: auto;
+  }
+  button {
+    display: none
+  }
+}
+
+// Discussion space topic list, taken from OA, then tweaked.
+.view-oa-comment-topics {
+  h3 {
+    font-size: 12px;
+    line-height: 1.1;
+    color: #6D7074;
+    font-weight: bold;
+    font-style: normal;
+    text-transform: uppercase;
+    border-top: 4px solid #EAEAEA;
+    margin: 0;
+    padding-top: 1.3em;
+    padding-bottom: 1.3em;
+  }
+  li {
+    border-top: 1px solid #EAEAEA;
+    padding: 10px 0;
+    font-size: 13px;
+  }
+  .oa-list.oa-discussion-topic {
+    .oa-list-header.oa-description {
+      overflow: visible;
+      text-align: right;
+      float: right;
+    }
+    h5 {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 0 0 2px 0;
+    }
+
+    .oa-reply-last {
+      display: inline-block;
+      text-align: right;
+      > a {
+        color: inherit;
+      }
+    }
+    .oa-reply-text {
+      display: none;
+    }
+    .oa-reply-icon {
+      position: relative;
+      display: inline-block;
+      .oa-reply-count {
+        position: relative;
+        display: inline-block;
+        z-index: 2;
+        color: white;
+        width: 2em;
+        text-align: center;
+        margin: 0 3px 3px 3px;
+        a {
+          color: inherit;
+        }
+      }
+      i {
+        position: absolute;
+        z-index: 1;
+        left: 0;
+        font-size: 25px;
+        top: -0.1em;
+        margin: 0 3px;
+        color: rgba(64, 64, 64, 0.7);
+      }
+      &.updated i {
+        color: rgba(150, 150, 0, 0.7);;
+      }
+      &.new i {
+        color: rgba(64, 161, 58, 0.7);
+      }
+    }
+  }
+}
+
+// Document Library
+.view-documents.view-display-id-full  {
+  .views-row {
+    border-top: 1px solid #EAEAEA;
+    padding: 15px 0 15px 0;
+    min-height: 130px;
+  }
+  h3 {
+    margin-top: 0;
+    font-weight: 400;
+  }
+  .views-more-link {
+    float: right;
+    margin-top: 10px;
+  }
+  .views-field-field-oa-media {
+    float: right;
+  }
+  .views-field-field-oa-media ~ .views-field {
+    padding-right: 130px;
+  }
+  .views-field-field-oa-media-1, .views-field-body {
+    margin-top: 5px;
+  }
+}
+.view-documents.view-display-id-mini {
+  tr {
+    background-color: transparent !important;
+  }
+  td {
+    padding: 0;
+    border: none;
+  }
+  table {
+    margin-bottom: 0px !important;
+  }
+  .form-group
+  {
+    margin-bottom: 0px !important;
+    margin-top: 10px;
+  }
+}
+
+// Document Page
+.node-document-page.view-mode-full {
+  .field-name-field-media-title {
+    font-size: 1.5em;
+  }
+  .file {
+    border-top: 1px solid #EAEAEA;
+    padding: 15px 0 15px 0;
+  }
+}
+
+// Collaboration Tools Dashboard Page
+.page-manage-collaboration-tools {
+  #edit-collab-tools-enabled {
+    float: left;
+    margin-top: 1em;
+    margin-right: 5px;
+  }
+}
+
+// Zoom icon for the zoom-on-colorbox.
+#cboxLoadedContent img {
+  cursor: url(../zoom.png), auto;
+}
+
+.node {
+  &.view-mode-full {
+    .field-name-mukurtu-icon-actions {
+      float: right;
+      //margin-top: -25px;
+    }
+  }
+}
+
+// DHAN view
+.view-dhan {
+  .chosen-container {
+    padding: 0;
+    border: 0;
+  }
+  .form-item-date-value {
+    .form-control {
+      height: 25px; // Make same height as the chosen filters.
+    }
+  }
+  #ma-dhan-dhan-frequency {
+    label {
+      float: left;
+      margin-right: 0.5em;
+    }
+    #edit-dhan-frequency {
+      width: auto;
+    }
+  }
+}
+
+// Export form.
+#mukurtu-export-form {
+	#edit-download-file-top {
+		margin-bottom: 20px;
+	}
+}
